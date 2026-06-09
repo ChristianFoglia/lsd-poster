@@ -110,7 +110,8 @@ const CONFIG = {
   damping: 0.88,
   repulsionStrength: 6.0,
   orbitStrength: 2.5,
-  audioSmooth: 0.25
+  audioSmooth: 0.25,
+  audioGain: 1.8
 };
 
 // ── STAR VERTICES (dal SVG) ──
@@ -259,7 +260,7 @@ function draw() {
         if (isDB) v = Math.max(0, (v + 90) / 90);
         sum += Math.min(1, Math.max(0, v));
       }
-      let avg = sum / raw.length;
+      let avg = sum / raw.length * CONFIG.audioGain;
       audioSmoothed += (avg - audioSmoothed) * CONFIG.audioSmooth;
     }
   } else {
