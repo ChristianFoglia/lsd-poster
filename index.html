@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LSD · Neon Poster</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+background:#000;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+overflow:hidden;
+font-family:monospace
+}
+#start-overlay{
+position:fixed;
+inset:0;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+background:#000;
+color:#45ff00;
+cursor:pointer;
+z-index:10;
+font-size:18px;
+letter-spacing:6px;
+text-transform:uppercase;
+user-select:none;
+transition:color .3s
+}
+#start-overlay span{font-size:13px;letter-spacing:2px;margin-top:16px;color:#45ff0066;transition:color .3s}
+#start-overlay:hover{color:#fff}
+#start-overlay:hover span{color:#ffffff66}
+#p5canvas{position:relative}
+#bocca{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:408.8px;
+  height:auto;
+  mix-blend-mode:multiply;
+  pointer-events:none;
+  z-index:5
+}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div id="start-overlay">
+<div>▶ Attiva Audio</div>
+<span>click per attivare suono e animazione</span>
+</div>
+<div id="p5canvas"></div>
+<img id="bocca" src="bocca.webp" alt="bocca">
+
+<!-- SVG sorgente (nascosto, usato come riferimento visivo e per i dati dei path) -->
+<svg id="source-svg" class="hidden" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 879.1 640.3">
+  <defs>
+    <style>
+      .cls-1 { isolation: isolate; }
+      .cls-2 { fill: none; stroke: #fff; stroke-miterlimit: 10; stroke-width: 4px; }
+      .cls-3 { fill: #45ff00; }
+      .cls-4 { mix-blend-mode: darken; }
+    </style>
+  </defs>
+  <g class="cls-1">
+    <g id="Livello_1" data-name="Livello 1">
+      <rect id="sfondo" class="cls-3" x="119.4" y="-119.4" width="640.3" height="879.1" transform="translate(119.4 759.7) rotate(-90)"/>
+      <polygon id="stella" class="cls-2" points="439.55 150.14 449.71 256.01 492.09 158.46 469.03 262.29 539.48 182.61 485.47 274.23 577.1 220.22 497.41 290.67 601.24 267.61 503.69 309.99 609.57 320.15 503.69 330.31 601.24 372.69 497.41 349.63 577.1 420.08 485.47 366.07 539.48 457.69 469.03 378.01 492.09 481.84 449.71 384.29 439.55 490.16 429.39 384.29 387.01 481.84 410.07 378.01 339.62 457.69 393.63 366.07 302.01 420.08 381.69 349.63 277.86 372.69 375.41 330.31 269.54 320.15 375.41 309.99 277.86 267.61 381.69 290.67 302.01 220.22 393.63 274.23 339.62 182.61 410.07 262.29 387.01 158.46 429.39 256.01 439.55 150.14"/>
+      <image id="bocca" class="cls-4" width="1022" height="1094" transform="translate(233.37 99.44) scale(.4)" xlink:href="../../Downloads/e519ec972d78a29184b687f0c9afe47e.webp"/>
+      <g id="parola">
+        <path id="L" d="M367.3,349.6v29.33h-87.83v-115.34h6.13v86.01h81.7Z"/>
+        <path id="S" d="M408.98,312.32c-6.24-4.31-9.36-10.71-9.36-19.22,0-9.39,3.45-16.99,10.36-22.79,6.9-5.8,16.05-8.92,27.43-9.36v-17.23h6.13v17.23c7.29.55,13.89,2.49,19.8,5.8,5.91,3.31,10.58,7.82,14,13.51,3.42,5.69,5.14,12.13,5.14,19.31h-6.13c0-6.19-1.44-11.65-4.31-16.41-2.87-4.75-6.79-8.53-11.77-11.35-4.97-2.82-10.55-4.45-16.74-4.89v51.04c9.06,1.88,16.07,3.67,21.04,5.39,4.97,1.71,9.2,4.56,12.68,8.53,3.48,3.98,5.22,9.56,5.22,16.74s-1.8,12.68-5.39,17.48c-3.59,4.81-8.31,8.45-14.17,10.94-5.86,2.49-12.32,3.89-19.39,4.23v15.58h-6.13v-15.58c-8.51-.44-15.97-2.43-22.37-5.97-6.41-3.53-11.3-8.31-14.67-14.33-3.37-6.02-5.05-12.9-5.05-20.63h6.13c-.11,10.17,3.04,18.39,9.45,24.69,6.41,6.3,15.25,9.78,26.51,10.44v-52.53c-12.71-2.76-22.18-6.3-28.42-10.61ZM414.94,273.95c-6.13,4.37-9.2,10.63-9.2,18.81,0,4.86,1.3,8.81,3.89,11.85,2.59,3.04,6.1,5.41,10.52,7.12,4.42,1.71,10.16,3.34,17.23,4.89v-49.88c-8.84.44-16.32,2.85-22.45,7.21ZM443.53,375.45c9.5-.44,17.34-3.01,23.53-7.71,6.19-4.69,9.28-11.02,9.28-18.97,0-5.63-1.35-10.03-4.06-13.17-2.71-3.15-6.19-5.44-10.44-6.88-4.25-1.43-10.36-2.98-18.31-4.64v51.37Z"/>
+        <path id="D" d="M520.75,378.93v-115.34h42.92c8.39,0,16.16,2.1,23.28,6.3,7.12,4.2,12.79,9.86,16.99,16.99,4.2,7.13,6.3,14.89,6.3,23.28v22.21c0,8.4-2.1,16.16-6.3,23.28-4.2,7.13-9.86,12.79-16.99,16.99-7.13,4.2-14.89,6.3-23.28,6.3h-42.92Z"/>
+      </g>
+    </g>
+  </g>
+</svg>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<script>
+/* =============================================================
+   LSD NEON POSTER — p5.js + Tone.js
+   Architettura a tre layer:
+   1. SFONDO – ciclo HSB continuo (tonalità neon)
+   2. STELLA – DuplicatingStar + reattività audio (FFT)
+   3. TESTO LSD – TextParticle con repulsione/orbita/trail
+   ============================================================= */
+
+// ── CONFIG ──
+const CONFIG = {
+  canvasW: 880,
+  canvasH: 640,
+  starSpawnInterval: 55,
+  starGrowthRate: 0.018,
+  starMaxScale: 7.0,
+  starBaseScale: 0.15,
+  bgHueStart: 104,
+  bgCycleSpeed: 2.2,
+  textSampleStep: 3,
+  mouseThreshold: 150,
+  trailLength: 8,
+  springStiffness: 0.035,
+  damping: 0.88,
+  repulsionStrength: 6.0,
+  orbitStrength: 2.5,
+  audioSmooth: 0.25
+};
+
+// ── STAR VERTICES (dal SVG) ──
+const STAR_POINTS = [
+  [439.55,150.14],[449.71,256.01],[492.09,158.46],[469.03,262.29],[539.48,182.61],
+  [485.47,274.23],[577.10,220.22],[497.41,290.67],[601.24,267.61],[503.69,309.99],
+  [609.57,320.15],[503.69,330.31],[601.24,372.69],[497.41,349.63],[577.10,420.08],
+  [485.47,366.07],[539.48,457.69],[469.03,378.01],[492.09,481.84],[449.71,384.29],
+  [439.55,490.16],[429.39,384.29],[387.01,481.84],[410.07,378.01],[339.62,457.69],
+  [393.63,366.07],[302.01,420.08],[381.69,349.63],[277.86,372.69],[375.41,330.31],
+  [269.54,320.15],[375.41,309.99],[277.86,267.61],[381.69,290.67],[302.01,220.22],
+  [393.63,274.23],[339.62,182.61],[410.07,262.29],[387.01,158.46],[429.39,256.01],
+  [439.55,150.14]
+];
+const STAR_CX = 439.55, STAR_CY = 320.15;
+
+// ── SVG PATH DATA ──
+const PATH_L = 'M367.3,349.6v29.33h-87.83v-115.34h6.13v86.01h81.7Z';
+const PATH_S = 'M408.98,312.32c-6.24-4.31-9.36-10.71-9.36-19.22,0-9.39,3.45-16.99,10.36-22.79,6.9-5.8,16.05-8.92,27.43-9.36v-17.23h6.13v17.23c7.29.55,13.89,2.49,19.8,5.8,5.91,3.31,10.58,7.82,14,13.51,3.42,5.69,5.14,12.13,5.14,19.31h-6.13c0-6.19-1.44-11.65-4.31-16.41-2.87-4.75-6.79-8.53-11.77-11.35-4.97-2.82-10.55-4.45-16.74-4.89v51.04c9.06,1.88,16.07,3.67,21.04,5.39,4.97,1.71,9.2,4.56,12.68,8.53,3.48,3.98,5.22,9.56,5.22,16.74s-1.8,12.68-5.39,17.48c-3.59,4.81-8.31,8.45-14.17,10.94-5.86,2.49-12.32,3.89-19.39,4.23v15.58h-6.13v-15.58c-8.51-.44-15.97-2.43-22.37-5.97-6.41-3.53-11.3-8.31-14.67-14.33-3.37-6.02-5.05-12.9-5.05-20.63h6.13c-.11,10.17,3.04,18.39,9.45,24.69,6.41,6.3,15.25,9.78,26.51,10.44v-52.53c-12.71-2.76-22.18-6.3-28.42-10.61ZM414.94,273.95c-6.13,4.37-9.2,10.63-9.2,18.81,0,4.86,1.3,8.81,3.89,11.85,2.59,3.04,6.1,5.41,10.52,7.12,4.42,1.71,10.16,3.34,17.23,4.89v-49.88c-8.84.44-16.32,2.85-22.45,7.21ZM443.53,375.45c9.5-.44,17.34-3.01,23.53-7.71,6.19-4.69,9.28-11.02,9.28-18.97,0-5.63-1.35-10.03-4.06-13.17-2.71-3.15-6.19-5.44-10.44-6.88-4.25-1.43-10.36-2.98-18.31-4.64v51.37Z';
+const PATH_D = 'M520.75,378.93v-115.34h42.92c8.39,0,16.16,2.1,23.28,6.3,7.12,4.2,12.79,9.86,16.99,16.99,4.2,7.13,6.3,14.89,6.3,23.28v22.21c0,8.4-2.1,16.16-6.3,23.28-4.2,7.13-9.86,12.79-16.99,16.99-7.13,4.2-14.89,6.3-23.28,6.3h-42.92Z';
+
+// ── GLOBALS ──
+let stars = [];
+let particles = [];
+let bgHue = CONFIG.bgHueStart;
+let spawnCounter = CONFIG.starSpawnInterval - 10;
+let fft, audioSmoothed;
+let audioReady = false;
+let audioSource = null;
+let needsClick = true;
+let flashIntensity = 0;
+let lastAudioPeak = 0;
+let starBuffer;
+let bgParticles = [];
+// ── P5 SETUP ──
+function setup() {
+  let canvas = createCanvas(CONFIG.canvasW, CONFIG.canvasH);
+  canvas.parent('p5canvas');
+  colorMode(HSB, 360, 100, 100, 100);
+  noStroke();
+  frameRate(60);
+  audioSmoothed = 0;
+  starBuffer = createGraphics(CONFIG.canvasW, CONFIG.canvasH);
+  starBuffer.colorMode(HSB, 360, 100, 100, 100);
+  for (let i = 0; i < 60; i++) bgParticles.push(new BgParticle());
+  sampleTextPixels();
+}
+
+// ── TEXT PIXEL SAMPLING ──
+function sampleTextPixels() {
+  let pg = createGraphics(CONFIG.canvasW, CONFIG.canvasH);
+  pg.background(0);
+  let ctx = pg.drawingContext;
+  ctx.fillStyle = '#ffffff';
+  try {
+    ctx.fill(new Path2D(PATH_L));
+    ctx.fill(new Path2D(PATH_S));
+    ctx.fill(new Path2D(PATH_D));
+  } catch(e) {
+    console.warn('Path2D fallback — using p5 text()', e);
+    pg.textFont('monospace');
+    pg.textSize(180);
+    pg.textStyle(BOLD);
+    pg.fill(255);
+    pg.text('LSD', 280, 370);
+  }
+  pg.loadPixels();
+  let step = CONFIG.textSampleStep;
+  let w = CONFIG.canvasW, h = CONFIG.canvasH;
+  for (let y = 2; y < h; y += step) {
+    for (let x = 2; x < w; x += step) {
+      let idx = (y * w + x) * 4;
+      if (pg.pixels[idx] > 200) {
+        // piccolo offset randomico iniziale per effetto organico
+        let ox = (Math.random() - 0.5) * 1.5;
+        let oy = (Math.random() - 0.5) * 1.5;
+        particles.push(new TextParticle(x + ox, y + oy));
+      }
+    }
+  }
+  pg.remove();
+}
+
+// ── AUDIO SETUP (chiamato al click) ──
+async function initAudio() {
+  try {
+    await Tone.start();
+    fft = new Tone.FFT(256);
+    try {
+      audioSource = new Tone.UserMedia();
+      await audioSource.open();
+      audioSource.connect(fft);
+    } catch(e) {
+      console.log('Mic unavailable — using oscillator');
+      let osc = new Tone.Oscillator(120, 'sawtooth').start();
+      osc.connect(fft);
+      audioSource = osc;
+    }
+    audioReady = true;
+  } catch(e) {
+    console.warn('Tone.js init failed:', e);
+  }
+}
+
+// ── P5 DRAW ──
+function draw() {
+  // 1. SFONDO – ciclo HSB ipnotico con flash
+  bgHue = (bgHue + CONFIG.bgCycleSpeed) % 360;
+  let sat = 70 + sin(frameCount * 0.03) * 15;
+  let bri = 95 + sin(frameCount * 0.05) * 5;
+
+  if (flashIntensity > 0.005) {
+    flashIntensity *= 0.88;
+  } else {
+    flashIntensity = 0;
+    if (audioReady && audioSmoothed > 0.03) {
+      let peak = audioSmoothed - lastAudioPeak;
+      if (peak > 0.015) {
+        flashIntensity = Math.min(1, peak * 12 + audioSmoothed * 0.3);
+      }
+    }
+    lastAudioPeak = audioSmoothed;
+  }
+
+  if (flashIntensity > 0.01) {
+    bri = 100;
+    sat *= (1 - flashIntensity * 0.7);
+    let hueShift = flashIntensity * flashIntensity * 200;
+    bgHue = (bgHue + hueShift) % 360;
+    flashIntensity = Math.min(1, flashIntensity + audioSmoothed * 0.15);
+  }
+
+  background(bgHue, sat, bri);
+
+  // Particelle di sfondo psichedeliche
+  for (let p of bgParticles) p.update();
+  for (let p of bgParticles) p.display();
+
+  // Lettura audio (supporta dB e 0-1)
+  if (audioReady && fft) {
+    let raw = fft.getValue();
+    if (raw && raw.length > 0) {
+      let sum = 0, isDB = raw[0] < -10;
+      for (let i = 0; i < raw.length; i++) {
+        let v = raw[i];
+        if (isDB) v = Math.max(0, (v + 90) / 90);
+        sum += Math.min(1, Math.max(0, v));
+      }
+      let avg = sum / raw.length;
+      audioSmoothed += (avg - audioSmoothed) * CONFIG.audioSmooth;
+    }
+  } else {
+    audioSmoothed *= 0.985;
+  }
+
+  // 2. STELLA – buffer feedback audio-reattivo
+  let fadeAmt = 3 + (1 - audioSmoothed) * 20;
+  starBuffer.noStroke();
+  starBuffer.fill(0, 0, 0, fadeAmt);
+  starBuffer.rect(0, 0, CONFIG.canvasW, CONFIG.canvasH);
+
+  spawnCounter++;
+  if (spawnCounter >= CONFIG.starSpawnInterval) {
+    stars.push(new DuplicatingStar());
+    spawnCounter = 0;
+  }
+  for (let i = stars.length - 1; i >= 0; i--) {
+    stars[i].update();
+    stars[i].display(starBuffer);
+    if (stars[i].isDead()) stars.splice(i, 1);
+  }
+
+  // Render buffer su canvas con effetto ad alto impatto
+  push();
+  blendMode(ADD);
+  let passes = 1 + floor(audioSmoothed * 5);
+  for (let i = 0; i < passes; i++) {
+    let spread = audioSmoothed * 3 * i;
+    image(starBuffer,
+          -spread / 2, -spread / 2,
+          CONFIG.canvasW + spread, CONFIG.canvasH + spread);
+  }
+  pop();
+
+  // 3. TESTO – particelle
+  for (let p of particles) p.update();
+  for (let p of particles) p.display();
+}
+
+// ── CLICK TO START ──
+function mousePressed() {
+  if (needsClick) {
+    needsClick = false;
+    document.getElementById('start-overlay').style.display = 'none';
+    initAudio();
+  }
+}
+// Allow spacebar too
+function keyPressed() {
+  if (needsClick && key === ' ') {
+    needsClick = false;
+    document.getElementById('start-overlay').style.display = 'none';
+    initAudio();
+  }
+}
+
+// ─────────────────────────────────────────────
+//  CLASS: DuplicatingStar
+// ─────────────────────────────────────────────
+class DuplicatingStar {
+  constructor() {
+    this.age = 0;
+    this.scale = CONFIG.starBaseScale;
+    this.rotation = 0;
+    // vertici come particelle: {homeX, homeY, x, y, vx, vy}
+    this.verts = [];
+    for (let i = 0; i < STAR_POINTS.length; i++) {
+      let hx = STAR_POINTS[i][0] - STAR_CX;
+      let hy = STAR_POINTS[i][1] - STAR_CY;
+      this.verts.push({homeX: hx, homeY: hy, x: hx, y: hy, vx: 0, vy: 0});
+    }
+    this.debris = [];
+  }
+
+  update() {
+    this.age++;
+    this.scale += CONFIG.starGrowthRate;
+    this.rotation += 0.028;
+    this.rotation += audioSmoothed * 0.03;
+
+    let shatterStr = audioSmoothed * 2.5;
+    for (let v of this.verts) {
+      // Spring verso home
+      let dx = v.x - v.homeX;
+      let dy = v.y - v.homeY;
+      v.vx += -dx * 0.04;
+      v.vy += -dy * 0.04;
+      v.vx += (Math.random() - 0.5) * shatterStr;
+      v.vy += (Math.random() - 0.5) * shatterStr;
+      v.vx *= 0.92;
+      v.vy *= 0.92;
+      v.x += v.vx;
+      v.y += v.vy;
+    }
+
+    // Emissione detriti dai vertici
+    if (audioSmoothed > 0.06 && random() < audioSmoothed * 0.3) {
+      let idx = floor(random(this.verts.length));
+      let v = this.verts[idx];
+      let s = this.scale;
+      let r = this.rotation;
+      let wx = STAR_CX + cos(r) * (v.x * s) - sin(r) * (v.y * s);
+      let wy = STAR_CY + sin(r) * (v.x * s) + cos(r) * (v.y * s);
+      this.debris.push(new StarParticle(wx, wy, bgHue));
+    }
+
+    for (let i = this.debris.length - 1; i >= 0; i--) {
+      this.debris[i].update();
+      if (this.debris[i].life <= 0) this.debris.splice(i, 1);
+    }
+  }
+
+  isDead() {
+    return this.scale > CONFIG.starMaxScale;
+  }
+
+  display(buf) {
+    if (this.scale < 0.05) return;
+    let use = buf || window;
+
+    let n = this.verts.length;
+    let t = Math.min(audioSmoothed * 5, 1);
+
+    let shatterAmt = audioSmoothed * 35;
+    let vx = [], vy = [];
+    for (let i = 0; i < n; i++) {
+      vx[i] = this.verts[i].x;
+      vy[i] = this.verts[i].y;
+      // Jitter extra sui vertici scomposti
+      if (audioSmoothed > 0.01) {
+        let angle = i * 1.618 + this.age * 0.025;
+        let amp = shatterAmt;
+        vx[i] += cos(angle) * amp;
+        vy[i] += sin(angle) * amp;
+      }
+    }
+
+    use.push();
+    use.translate(STAR_CX, STAR_CY);
+    use.scale(this.scale);
+    use.rotate(this.rotation);
+    use.noFill();
+    use.strokeWeight(1.2);
+
+    let opSharp = (1 - t) * 75;
+    if (opSharp > 0.5) {
+      use.stroke(255, opSharp);
+      use.beginShape();
+      for (let i = 0; i < n; i++) use.vertex(vx[i], vy[i]);
+      use.endShape(CLOSE);
+    }
+
+    let opRound = t * 80;
+    if (opRound > 0.5) {
+      use.stroke(255, opRound);
+      use.beginShape();
+      use.curveTightness(-0.25 - audioSmoothed * 0.35);
+      for (let i = 0; i < n; i++) use.curveVertex(vx[i], vy[i]);
+      use.endShape(CLOSE);
+    }
+
+    // Punti particella ai vertici
+    if (audioSmoothed > 0.03) {
+      for (let i = 0; i < n; i++) {
+        let px = vx[i];
+        let py = vy[i];
+        let distFromHome = dist(px, py, this.verts[i].homeX, this.verts[i].homeY);
+        if (distFromHome > 2) {
+          let sz = 1.5 + distFromHome * 0.08;
+          let hue = (bgHue + i * 11) % 360;
+          use.fill(hue, 80, 100, 70);
+          use.noStroke();
+          use.circle(px, py, sz);
+        }
+      }
+    }
+
+    use.pop();
+
+    // Detriti in coordinate mondo
+    for (let d of this.debris) d.display();
+  }
+}
+
+// ─────────────────────────────────────────────
+//  CLASS: StarParticle
+// ─────────────────────────────────────────────
+class StarParticle {
+  constructor(x, y, hue) {
+    this.x = x;
+    this.y = y;
+    this.homeX = x;
+    this.homeY = y;
+    this.vx = (Math.random() - 0.5) * 2;
+    this.vy = (Math.random() - 0.5) * 2;
+    this.life = 1;
+    this.size = random(1.5, 4);
+    this.hue = (hue + random(-40, 40) + 360) % 360;
+    this.maxDist = 80 + random(60);
+    this.driftAngle = random(TWO_PI);
+  }
+
+  update() {
+    this.driftAngle += (Math.random() - 0.5) * 0.5;
+    let wander = audioSmoothed * 1.5;
+    this.vx += cos(this.driftAngle) * wander * 0.08;
+    this.vy += sin(this.driftAngle) * wander * 0.08;
+
+    let dx = this.x - this.homeX;
+    let dy = this.y - this.homeY;
+    let distFromHome = sqrt(dx * dx + dy * dy);
+    if (distFromHome > this.maxDist) {
+      let pull = (distFromHome - this.maxDist) * 0.02;
+      this.vx -= (dx / distFromHome) * pull;
+      this.vy -= (dy / distFromHome) * pull;
+    }
+
+    this.vx *= 0.96;
+    this.vy *= 0.96;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life -= 0.003;
+  }
+
+  display() {
+    if (this.life <= 0) return;
+    let alpha = this.life * 80;
+    let sz = this.size * (0.4 + this.life * 0.6);
+    noStroke();
+    fill(this.hue, 70, 100, alpha * 0.3);
+    circle(this.x, this.y, sz * 3);
+    fill(this.hue, 50, 100, alpha);
+    circle(this.x, this.y, sz);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  CLASS: BgParticle
+// ─────────────────────────────────────────────
+class BgParticle {
+  constructor() {
+    this.x = random(CONFIG.canvasW);
+    this.y = random(CONFIG.canvasH);
+    this.vx = (Math.random() - 0.5) * 2;
+    this.vy = (Math.random() - 0.5) * 2;
+    this.size = random(20, 80);
+    this.hueOff = random(360);
+    this.rot = random(TWO_PI);
+    this.rotSpeed = (Math.random() - 0.5) * 0.05;
+    this.life = random(0.4, 1);
+  }
+
+  update() {
+    let audioPush = audioSmoothed * 3;
+    this.vx += (Math.random() - 0.5) * (0.2 + audioPush * 0.1);
+    this.vy += (Math.random() - 0.5) * (0.2 + audioPush * 0.1);
+    this.vx *= 0.97;
+    this.vy *= 0.97;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.rot += this.rotSpeed + (Math.random() - 0.5) * audioSmoothed * 0.08;
+    if (this.x < -this.size) this.x = CONFIG.canvasW + this.size;
+    if (this.x > CONFIG.canvasW + this.size) this.x = -this.size;
+    if (this.y < -this.size) this.y = CONFIG.canvasH + this.size;
+    if (this.y > CONFIG.canvasH + this.size) this.y = -this.size;
+    this.life += (0.5 + audioSmoothed * 0.5 - this.life) * 0.006;
+  }
+
+  display() {
+    let hue = (bgHue + this.hueOff + sin(frameCount * 0.02 + this.hueOff) * 80) % 360;
+    let alpha = this.life * (15 + audioSmoothed * 25);
+    let sz = this.size * (0.5 + this.life * 0.5) * (1 + audioSmoothed * 0.5);
+    noStroke();
+    rectMode(CENTER);
+    fill(hue, 70, 50 + this.life * 30, alpha);
+    push();
+    translate(this.x, this.y);
+    rotate(this.rot);
+    rect(0, 0, sz, sz);
+    fill((hue + 60) % 360, 80, 40, alpha * 0.5);
+    rotate(this.rot * 1.5);
+    rect(sz * 0.1, -sz * 0.1, sz * 0.5, sz * 0.5);
+    pop();
+    rectMode(CORNER);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  CLASS: TextParticle
+// ─────────────────────────────────────────────
+class TextParticle {
+  constructor(x, y) {
+    this.homeX = x;
+    this.homeY = y;
+    this.x = x;
+    this.y = y;
+    this.vx = 0;
+    this.vy = 0;
+    this.size = random(1.8, 3.2);
+    // trail buffer
+    this.trail = [];
+  }
+
+  update() {
+    let dx = this.x - this.homeX;
+    let dy = this.y - this.homeY;
+
+    // Spring verso casa
+    this.vx += -dx * CONFIG.springStiffness;
+    this.vy += -dy * CONFIG.springStiffness;
+
+    // Interazione mouse
+    let mDist = dist(this.x, this.y, mouseX, mouseY);
+    if (mDist < CONFIG.mouseThreshold && mDist > 0.1) {
+      let force = (CONFIG.mouseThreshold - mDist) / CONFIG.mouseThreshold;
+      let nx = (this.x - mouseX) / mDist;
+      let ny = (this.y - mouseY) / mDist;
+
+      // Repulsione
+      this.vx += nx * force * CONFIG.repulsionStrength;
+      this.vy += ny * force * CONFIG.repulsionStrength;
+
+      // Orbita (perpendicolare alla direzione di fuga)
+      let orbitDir = (Math.floor(Math.random() * 3) - 1) * 0.6 + 0.4;
+      this.vx += -ny * force * CONFIG.orbitStrength * orbitDir;
+      this.vy += nx * force * CONFIG.orbitStrength * orbitDir;
+    }
+
+    // Damping
+    this.vx *= CONFIG.damping;
+    this.vy *= CONFIG.damping;
+
+    this.x += this.vx;
+    this.y += this.vy;
+
+    // Trail buffer
+    this.trail.push({x: this.x, y: this.y});
+    if (this.trail.length > CONFIG.trailLength) this.trail.shift();
+  }
+
+  display() {
+    // Trail
+    let len = this.trail.length;
+    for (let i = 0; i < len; i++) {
+      let t = i / (len - 1 || 1);
+      let alpha = t * t * 70;
+      let s = this.size * (0.2 + t * 0.8);
+      fill(0, 0, 0, alpha);
+      noStroke();
+      rectMode(CENTER);
+      rect(this.trail[i].x, this.trail[i].y, s, s);
+    }
+    // Particle principale (nero)
+    fill(0, 0, 0, 85);
+    noStroke();
+    rectMode(CENTER);
+    rect(this.x, this.y, this.size, this.size);
+    rectMode(CORNER);
+  }
+}
+</script>
+</body>
+</html>
