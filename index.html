@@ -171,6 +171,10 @@ let flashIntensity = 0;
 let lastAudioPeak = 0;
 let starBuffer;
 let bgParticles = [];
+let rawCX = 0, rawCY = 0;
+document.addEventListener('mousemove', e => { rawCX = e.clientX; rawCY = e.clientY; });
+document.addEventListener('touchstart', e => { if (e.touches.length) { rawCX = e.touches[0].clientX; rawCY = e.touches[0].clientY; } }, {passive:true});
+document.addEventListener('touchmove', e => { if (e.touches.length) { rawCX = e.touches[0].clientX; rawCY = e.touches[0].clientY; } }, {passive:true});
 // ── P5 SETUP ──
 function setup() {
   let canvas = createCanvas(CONFIG.canvasW, CONFIG.canvasH);
@@ -324,6 +328,15 @@ function draw() {
   // 3. TESTO – particelle
   for (let p of particles) p.update();
   for (let p of particles) p.display();
+}
+
+function getMousePos() {
+  let c = document.querySelector('#p5canvas canvas');
+  if (!c) return {x: mouseX, y: mouseY};
+  let rect = c.getBoundingClientRect();
+  let nx = (rawCX - rect.left) / rect.width;
+  let ny = (rawCY - rect.top) / rect.height;
+  return {x: nx * CONFIG.canvasW, y: ny * CONFIG.canvasH};
 }
 
 // ── CLICK TO START ──
@@ -598,18 +611,17 @@ class TextParticle {
     this.vx += -dx * CONFIG.springStiffness;
     this.vy += -dy * CONFIG.springStiffness;
 
-    // Interazione mouse
-    let mDist = dist(this.x, this.y, mouseX, mouseY);
+    // Interazione mouse (con supporto mobile rotation)
+    let mp = getMousePos();
+    let mDist = dist(this.x, this.y, mp.x, mp.y);
     if (mDist < CONFIG.mouseThreshold && mDist > 0.1) {
       let force = (CONFIG.mouseThreshold - mDist) / CONFIG.mouseThreshold;
-      let nx = (this.x - mouseX) / mDist;
-      let ny = (this.y - mouseY) / mDist;
+      let nx = (this.x - mp.x) / mDist;
+      let ny = (this.y - mp.y) / mDist;
 
-      // Repulsione
       this.vx += nx * force * CONFIG.repulsionStrength;
       this.vy += ny * force * CONFIG.repulsionStrength;
 
-      // Orbita (perpendicolare alla direzione di fuga)
       let orbitDir = (Math.floor(Math.random() * 3) - 1) * 0.6 + 0.4;
       this.vx += -ny * force * CONFIG.orbitStrength * orbitDir;
       this.vy += nx * force * CONFIG.orbitStrength * orbitDir;
