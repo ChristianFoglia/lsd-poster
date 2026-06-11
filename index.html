@@ -6,48 +6,70 @@
 <title>LSD · Neon Poster</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-background:#000;
-display:flex;
-justify-content:center;
-align-items:center;
-min-height:100vh;
-overflow:hidden;
-font-family:monospace
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:monospace}
+body{display:flex;justify-content:center;align-items:center}
+
+#source-svg{
+  position:fixed;
+  top:50%;
+  left:50%;
+  width:100vh;
+  height:100vw;
+  transform:translate(-50%,-50%) rotate(90deg);
+  z-index:0;
+  pointer-events:none
 }
-#start-overlay{
-position:fixed;
-inset:0;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-background:#000;
-color:#45ff00;
-cursor:pointer;
-z-index:10;
-font-size:18px;
-letter-spacing:6px;
-text-transform:uppercase;
-user-select:none;
-transition:color .3s
+
+#p5canvas{
+  position:relative;
+  z-index:2;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  width:min(100vw, calc(100vh * 880 / 640));
+  height:min(100vh, calc(100vw * 640 / 880))
 }
-#start-overlay span{font-size:13px;letter-spacing:2px;margin-top:16px;color:#45ff0066;transition:color .3s}
-#start-overlay:hover{color:#fff}
-#start-overlay:hover span{color:#ffffff66}
-#p5canvas{position:relative}
+#p5canvas canvas{
+  width:100% !important;
+  height:100% !important;
+  display:block
+}
+
 #bocca{
   position:fixed;
   left:50%;
   top:50%;
   transform:translate(-50%,-50%);
-  width:408.8px;
+  width:min(46vw, calc(46vh * 880 / 640));
   height:auto;
+  max-width:408.8px;
   mix-blend-mode:multiply;
   pointer-events:none;
-  z-index:5
+  z-index:1
 }
-.hidden{display:none}
+
+#start-overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:#000;
+  color:#45ff00;
+  cursor:pointer;
+  z-index:10;
+  font-size:clamp(12px, 3vw, 18px);
+  letter-spacing:6px;
+  text-transform:uppercase;
+  user-select:none;
+  transition:color .3s;
+  text-align:center;
+  padding:20px
+}
+#start-overlay span{font-size:clamp(10px, 2.5vw, 13px);letter-spacing:2px;margin-top:16px;color:#45ff0066;transition:color .3s}
+#start-overlay:hover{color:#fff}
+#start-overlay:hover span{color:#ffffff66}
 </style>
 </head>
 <body>
@@ -59,7 +81,7 @@ transition:color .3s
 <img id="bocca" src="bocca.webp" alt="bocca">
 
 <!-- SVG sorgente (nascosto, usato come riferimento visivo e per i dati dei path) -->
-<svg id="source-svg" class="hidden" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 879.1 640.3">
+<svg id="source-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 879.1 640.3" preserveAspectRatio="xMidYMid slice">
   <defs>
     <style>
       .cls-1 { isolation: isolate; }
