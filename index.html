@@ -172,6 +172,7 @@ let lastAudioPeak = 0;
 let starBuffer;
 let bgParticles = [];
 let rawCX = 0, rawCY = 0;
+let mpCache = {x:0, y:0};
 document.addEventListener('mousemove', e => { rawCX = e.clientX; rawCY = e.clientY; });
 document.addEventListener('touchstart', e => { if (e.touches.length) { rawCX = e.touches[0].clientX; rawCY = e.touches[0].clientY; } }, {passive:true});
 document.addEventListener('touchmove', e => { if (e.touches.length) { rawCX = e.touches[0].clientX; rawCY = e.touches[0].clientY; } }, {passive:true});
@@ -326,24 +327,29 @@ function draw() {
   pop();
 
   // 3. TESTO – particelle
+  computeMousePos();
   for (let p of particles) p.update();
   for (let p of particles) p.display();
 }
 
 let cachedCanvas = null;
-function getMousePos() {
+function computeMousePos() {
   if (!cachedCanvas) cachedCanvas = document.querySelector('#p5canvas canvas');
-  if (!cachedCanvas) return {x: mouseX, y: mouseY};
+  if (!cachedCanvas) return;
   let rect = cachedCanvas.getBoundingClientRect();
   let nx = (rawCX - rect.left) / rect.width;
   let ny = (rawCY - rect.top) / rect.height;
   let p5 = document.getElementById('p5canvas');
   let rotated = p5 && getComputedStyle(p5).transform !== 'none';
   if (rotated) {
-    return {x: ny * CONFIG.canvasW, y: (1 - nx) * CONFIG.canvasH};
+    mpCache.x = ny * CONFIG.canvasW;
+    mpCache.y = (1 - nx) * CONFIG.canvasH;
+  } else {
+    mpCache.x = nx * CONFIG.canvasW;
+    mpCache.y = ny * CONFIG.canvasH;
   }
-  return {x: nx * CONFIG.canvasW, y: ny * CONFIG.canvasH};
 }
+function getMousePos() { return mpCache; }
 
 // ── CLICK TO START ──
 function mousePressed() {
