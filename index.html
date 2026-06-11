@@ -330,12 +330,18 @@ function draw() {
   for (let p of particles) p.display();
 }
 
+let cachedCanvas = null;
 function getMousePos() {
-  let c = document.querySelector('#p5canvas canvas');
-  if (!c) return {x: mouseX, y: mouseY};
-  let rect = c.getBoundingClientRect();
+  if (!cachedCanvas) cachedCanvas = document.querySelector('#p5canvas canvas');
+  if (!cachedCanvas) return {x: mouseX, y: mouseY};
+  let rect = cachedCanvas.getBoundingClientRect();
   let nx = (rawCX - rect.left) / rect.width;
   let ny = (rawCY - rect.top) / rect.height;
+  let p5 = document.getElementById('p5canvas');
+  let rotated = p5 && getComputedStyle(p5).transform !== 'none';
+  if (rotated) {
+    return {x: ny * CONFIG.canvasW, y: (1 - nx) * CONFIG.canvasH};
+  }
   return {x: nx * CONFIG.canvasW, y: ny * CONFIG.canvasH};
 }
 
