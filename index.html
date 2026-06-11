@@ -54,14 +54,15 @@ html, body{
 }
 .hidden{display:none}
 
-/* Mobile: rotazione 90° */
+/* Mobile: rotazione 90° con aspect ratio preserved */
 @media (orientation: portrait) and (max-aspect-ratio: 4/3) {
   #p5canvas {
-    width:100vh;
-    height:100vw;
+    width:min(100vh, calc(100vw * 880 / 640));
+    height:min(100vw, calc(100vh * 640 / 880));
     transform:rotate(90deg);
   }
   #bocca {
+    transform:translate(-50%,-50%) rotate(90deg);
     width:min(40vh, calc(40vw * 640 / 880));
   }
   #start-overlay {
