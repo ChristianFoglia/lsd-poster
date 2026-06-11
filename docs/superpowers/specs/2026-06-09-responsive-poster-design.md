@@ -1,24 +1,33 @@
 # Responsive Poster Design
 
 ## Goal
-Rendere l'LSD Neon Poster responsive a qualsiasi viewport (mobile, tablet, desktop) con centratura e scaling proporzionale.
+Rendere l'LSD Neon Poster responsive: su PC invariato, su mobile (verticale) tutto ruota di 90° ed è centrato.
 
-## Approccio: CSS Scaling
-Il canvas p5.js rimane a risoluzione fissa 880×640. Il responsive è gestito interamente via CSS, senza modificare la logica di rendering o le coordinate interne.
+## Approccio
+Il canvas p5.js rimane a risoluzione fissa 880×640. Il responsive è gestito via CSS + media query, senza modificare la logica di rendering o le coordinate interne.
 
-## Modifiche
+## Desktop (invariato)
+- Canvas 880×640 centrato orizzontalmente e verticalmente nel viewport
+- `#bocca`: centrata, dimensioni originali (408.8px)
+- Stella, parola, sfondo: nessuna modifica
 
-### CSS
-- **Body**: display flex, centratura orizzontale e verticale, overflow hidden
-- **`#p5canvas`**: contenitore ad aspect-ratio 880:640, dimensioni calcolate con viewport units (`width: min(100vw, calc(100vh * 880/640))` e viceversa per height)
-- **Canvas `<canvas>`**: override degli stili inline di p5 con `!important` per adattarsi al contenitore
-- **`#bocca`**: da pixel fissi (408.8px) a percentuale relativa al viewport
-- **`#start-overlay`**: già full-viewport, nessuna modifica
+## Mobile (rilevato da `@media (orientation: portrait)` o `aspect-ratio < 1`)
+- **Rotazione 90°**: il container `#p5canvas` viene ruotato via CSS `transform: rotate(90deg)`, effettivamente portando il canvas 880×640 in orientamento portrait (640×880)
+- **Scaling**: il canvas ruotato viene scalato proporzionalmente per riempire il viewport (`width: 100vh`, `height: 100vw` dopo rotazione)
+- **Centratura**: tutti gli elementi (stella, bocca, parola) sono già centrati nelle coordinate 880×640 originali — dopo rotazione 90° restano centrati
+- **`#bocca`**: dimensioni scalate con `calc()` in base al viewport
 
-### p5.js (nessuna modifica al codice)
-- `createCanvas(880, 640)` invariato — le coordinate interne restano 880×640
-- `mouseX`/`mouseY` corretti automaticamente da p5.js quando il canvas è CSS-scalato
-- `windowResized()` opzionale per gestire resize dinamici del viewport
+## Elementi interessati
+- `index.html` — sezione `<style>` (media query, rotazione, scaling)
+- Nessuna modifica al codice p5.js
 
-### File interessati
-- `index.html` (solo sezione `<style>`)
+## Rilevamento mobile
+```css
+/* Portrait / mobile: aspect-ratio verticale */
+@media (orientation: portrait) and (max-aspect-ratio: 4/3) {
+  #p5canvas {
+    transform: rotate(90deg);
+    /* scaling per riempire lo schermo */
+  }
+}
+```
